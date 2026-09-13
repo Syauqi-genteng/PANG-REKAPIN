@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manajemen Keuangan Bisnis</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">💰</div>
+        <div>
+          <h1>Keuangan Bisnis</h1>
+          <p>Manajemen Produk & Profit</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <button class="nav-btn active" data-menu="komponen">
+          <span class="nav-icon">📦</span>
+          <span>Daftar Komponen</span>
+        </button>
+        <button class="nav-btn" data-menu="penjualan">
+          <span class="nav-icon">🛒</span>
+          <span>Daftar Penjualan</span>
+        </button>
+        <button class="nav-btn" data-menu="rekap-penjualan">
+          <span class="nav-icon">📊</span>
+          <span>Rekap Penjualan</span>
+        </button>
+        <button class="nav-btn" data-menu="profit-modal">
+          <span class="nav-icon">💵</span>
+          <span>Rekap Profit & Modal</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <small>Data disimpan di browser</small>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- MENU 1: Daftar Komponen -->
+      <section id="menu-komponen" class="menu-section active">
+        <header class="menu-header">
+          <h2>Daftar Komponen / Produk</h2>
+          <p>Kelola produk, bahan baku, HPP, dan harga jual dengan markup bebas</p>
+        </header>
+
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="tambah-produk">Tambah Produk</button>
+          <button class="tab-btn" data-tab="daftar-produk">Daftar & Hapus</button>
+        </div>
+
+        <!-- Sub: Tambah Produk -->
+        <div id="tab-tambah-produk" class="tab-content active">
+          <div class="card">
+            <h3>Tambah Produk Baru</h3>
+            <form id="form-produk">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Nama Produk *</label>
+                  <input type="text" id="nama-produk" required placeholder="Contoh: Keripik Singkong Original" />
+                </div>
+                <div class="form-group">
+                  <label>SKU Produk *</label>
+                  <input type="text" id="sku-produk" required placeholder="Contoh: KSO-001" />
+                </div>
+              </div>
+
+              <div class="bahan-section">
+                <div class="bahan-header">
+                  <h4>Daftar Bahan Baku</h4>
+                  <button type="button" class="btn btn-sm btn-secondary" id="btn-tambah-bahan">+ Tambah Bahan</button>
+                </div>
+                <div id="bahan-list">
+                  <!-- dynamic rows -->
+                </div>
+              </div>
+
+              <!-- Kalkulator Markup -->
+              <div class="calc-box markup-box">
+                <div class="calc-item">
+                  <span>Total HPP (Modal)</span>
+                  <strong id="preview-hpp">Rp 0</strong>
+                </div>
+
+                <div class="calc-item">
+                  <span>Markup Keuntungan (%)</span>
+                  <input type="number" id="markup-persen" min="0" step="1" value="100" placeholder="100" />
+                </div>
+
+                <div class="calc-item highlight">
+                  <span>Harga Jual</span>
+                  <strong id="preview-jual">Rp 0</strong>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Simpan Produk</button>
+                <button type="button" class="btn btn-outline" id="btn-reset-form">Reset</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Sub: Daftar & Hapus -->
+        <div id="tab-daftar-produk" class="tab-content">
+          <div class="card">
+            <div class="search-bar">
+              <input type="text" id="search-produk" placeholder="Cari nama produk atau SKU..." />
+            </div>
+            <div id="produk-list" class="produk-list">
+              <!-- dynamic -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MENU 2: Daftar Penjualan -->
+      <section id="menu-penjualan" class="menu-section">
+        <header class="menu-header">
+          <h2>Daftar Penjualan</h2>
+          <p>Input penjualan harian bulan berjalan</p>
+        </header>
+
+        <div class="summary-cards" id="summary-bulan-ini">
+          <div class="summary-card">
+            <span class="label">Bulan</span>
+            <strong id="label-bulan">-</strong>
+          </div>
+          <div class="summary-card">
+            <span class="label">Total Penjualan Kotor</span>
+            <strong id="total-kotor-bulan">Rp 0</strong>
+          </div>
+          <div class="summary-card">
+            <span class="label">Total Qty Terjual</span>
+            <strong id="total-qty-bulan">0</strong>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Input Penjualan Hari Ini</h3>
+          <form id="form-penjualan">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Tanggal</label>
+                <input type="date" id="tanggal-jual" required />
+              </div>
+              <div class="form-group">
+                <label>Cari Produk (Nama / SKU)</label>
+                <input type="text" id="cari-produk-jual" placeholder="Ketik nama atau SKU..." autocomplete="off" />
+                <div id="hasil-cari-produk" class="dropdown-hasil"></div>
+              </div>
+              <div class="form-group">
+                <label>Jumlah Terjual (Qty)</label>
+                <input type="number" id="qty-jual" min="1" value="1" required />
+              </div>
+            </div>
+            <div id="produk-terpilih" class="produk-terpilih" style="display:none;">
+              <div class="info">
+                <strong id="pilih-nama">-</strong>
+                <span id="pilih-sku">-</span>
+              </div>
+              <div class="info-harga">
+                <span>Harga Jual: <b id="pilih-jual">-</b></span>
+                <span>HPP: <b id="pilih-hpp">-</b></span>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="btn-simpan-jual" disabled>Catat Penjualan</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Riwayat Penjualan Bulan Ini</h3>
+          <div id="riwayat-penjualan" class="riwayat-list">
+            <!-- dynamic -->
+          </div>
+        </div>
+      </section>
+
+      <!-- MENU 3: Rekap Penjualan -->
+      <section id="menu-rekap-penjualan" class="menu-section">
+        <header class="menu-header">
+          <h2>Rekap Penjualan</h2>
+          <p>Ringkasan penjualan per bulan + pemisahan modal & profit</p>
+        </header>
+
+        <div class="card">
+          <div class="filter-row">
+            <label>Pilih Bulan:</label>
+            <select id="select-bulan-rekap">
+              <option value="">-- Pilih Bulan --</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="detail-rekap-bulan" class="rekap-detail" style="display:none;">
+          <div class="summary-cards three">
+            <div class="summary-card green">
+              <span class="label">Total Penjualan Kotor</span>
+              <strong id="rekap-kotor">Rp 0</strong>
+            </div>
+            <div class="summary-card blue">
+              <span class="label">Total Modal (HPP)</span>
+              <strong id="rekap-modal">Rp 0</strong>
+            </div>
+            <div class="summary-card orange">
+              <span class="label">Total Keuntungan</span>
+              <strong id="rekap-profit">Rp 0</strong>
+            </div>
+          </div>
+
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+              <h3 style="margin:0;">Detail Transaksi Bulan Ini</h3>
+              <button class="btn btn-sm btn-danger" id="btn-hapus-bulan">Hapus Data Bulan Ini</button>
+            </div>
+            <div id="detail-transaksi-rekap" class="table-wrap">
+              <!-- table -->
+            </div>
+          </div>
+        </div>
+
+        <div id="empty-rekap" class="empty-state">
+          <p>Belum ada data rekap. Mulai catat penjualan di menu <strong>Daftar Penjualan</strong>.</p>
+        </div>
+      </section>
+
+      <!-- MENU 4: Rekap Profit & Modal -->
+      <section id="menu-profit-modal" class="menu-section">
+        <header class="menu-header">
+          <h2>Rekap Profit & Modal</h2>
+          <p>Pisahkan uang modal yang aman dipakai dan keuntungan yang bisa diambil</p>
+        </header>
+
+        <div class="summary-cards two big">
+          <div class="summary-card blue big">
+            <span class="label">Total Modal Aman</span>
+            <strong id="total-modal-aman">Rp 0</strong>
+            <small>Uang HPP yang sudah kembali dari penjualan. Bisa dipakai untuk beli bahan lagi.</small>
+          </div>
+          <div class="summary-card orange big">
+            <span class="label">Total Keuntungan</span>
+            <strong id="total-keuntungan">Rp 0</strong>
+            <small>Uang profit murni. Bisa diambil / dipakai untuk kebutuhan lain.</small>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+            <h3 style="margin:0;">Ringkasan per Bulan</h3>
+            <button class="btn btn-sm btn-danger" id="btn-reset-semua">Reset Semua Data Penjualan</button>
+          </div>
+          <div id="tabel-profit-modal" class="table-wrap">
+            <!-- dynamic table -->
+          </div>
+        </div>
+
+        <div class="card info-box">
+          <h4>📌 Cara Baca</h4>
+          <ul>
+            <li><strong>Modal Aman</strong> = Total HPP dari semua produk yang sudah terjual. Ini adalah uang yang “kembali” dan aman dipakai untuk membeli bahan baku lagi.</li>
+            <li><strong>Keuntungan</strong> = Selisih Harga Jual − HPP. Ini adalah profit murni yang bisa kamu ambil atau pakai bebas.</li>
+            <li>Setiap kali ada penjualan, sistem otomatis memisahkan bagian modal dan bagian profit.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal Konfirmasi Hapus Produk -->
+  <div id="modal-hapus" class="modal">
+    <div class="modal-content">
+      <h3>Konfirmasi Hapus</h3>
+      <p>Apakah kamu yakin ingin menghapus produk <strong id="hapus-nama-produk"></strong>?</p>
+      <p class="warning">Data yang dihapus tidak bisa dikembalikan.</p>
+      <div class="modal-actions">
+        <button class="btn btn-danger" id="btn-confirm-hapus">DELETE</button>
+        <button class="btn btn-outline" id="btn-batal-hapus">BATAL</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
