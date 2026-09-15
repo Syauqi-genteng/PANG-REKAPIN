@@ -57,7 +57,6 @@
           <button class="tab-btn" data-tab="daftar-produk">Daftar & Hapus</button>
         </div>
 
-        <!-- Sub: Tambah Produk -->
         <div id="tab-tambah-produk" class="tab-content active">
           <div class="card">
             <h3>Tambah Produk Baru</h3>
@@ -78,23 +77,18 @@
                   <h4>Daftar Bahan Baku</h4>
                   <button type="button" class="btn btn-sm btn-secondary" id="btn-tambah-bahan">+ Tambah Bahan</button>
                 </div>
-                <div id="bahan-list">
-                  <!-- dynamic rows -->
-                </div>
+                <div id="bahan-list"></div>
               </div>
 
-              <!-- Kalkulator Markup -->
               <div class="calc-box markup-box">
                 <div class="calc-item">
                   <span>Total HPP (Modal)</span>
                   <strong id="preview-hpp">Rp 0</strong>
                 </div>
-
                 <div class="calc-item">
                   <span>Markup Keuntungan (%)</span>
                   <input type="number" id="markup-persen" min="0" step="1" value="100" placeholder="100" />
                 </div>
-
                 <div class="calc-item highlight">
                   <span>Harga Jual</span>
                   <strong id="preview-jual">Rp 0</strong>
@@ -109,15 +103,12 @@
           </div>
         </div>
 
-        <!-- Sub: Daftar & Hapus -->
         <div id="tab-daftar-produk" class="tab-content">
           <div class="card">
             <div class="search-bar">
               <input type="text" id="search-produk" placeholder="Cari nama produk atau SKU..." />
             </div>
-            <div id="produk-list" class="produk-list">
-              <!-- dynamic -->
-            </div>
+            <div id="produk-list" class="produk-list"></div>
           </div>
         </div>
       </section>
@@ -162,16 +153,31 @@
                 <input type="number" id="qty-jual" min="1" value="1" required />
               </div>
             </div>
+
             <div id="produk-terpilih" class="produk-terpilih" style="display:none;">
               <div class="info">
                 <strong id="pilih-nama">-</strong>
                 <span id="pilih-sku">-</span>
               </div>
-              <div class="info-harga">
-                <span>Harga Jual: <b id="pilih-jual">-</b></span>
-                <span>HPP: <b id="pilih-hpp">-</b></span>
+              <div class="info-harga" style="display:flex; flex-direction:column; gap:6px; min-width:180px;">
+                <div><span>Harga Jual: </span><b id="pilih-jual">-</b></div>
+                <div><span>HPP: </span><b id="pilih-hpp">-</b></div>
               </div>
             </div>
+
+            <div id="harga-akhir-section" style="display:none; margin-top:16px;">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Harga Akhir (yang diterima) *</label>
+                  <input type="number" id="harga-akhir" min="0" placeholder="Contoh: 27000" />
+                </div>
+                <div class="form-group">
+                  <label>Potongan</label>
+                  <input type="text" id="potongan" readonly placeholder="Otomatis" style="background:#1e293b; color:#f97316; font-weight:600;" />
+                </div>
+              </div>
+            </div>
+
             <div class="form-actions">
               <button type="submit" class="btn btn-primary" id="btn-simpan-jual" disabled>Catat Penjualan</button>
             </div>
@@ -180,9 +186,7 @@
 
         <div class="card">
           <h3>Riwayat Penjualan Bulan Ini</h3>
-          <div id="riwayat-penjualan" class="riwayat-list">
-            <!-- dynamic -->
-          </div>
+          <div id="riwayat-penjualan" class="riwayat-list"></div>
         </div>
       </section>
 
@@ -223,9 +227,7 @@
               <h3 style="margin:0;">Detail Transaksi Bulan Ini</h3>
               <button class="btn btn-sm btn-danger" id="btn-hapus-bulan">Hapus Data Bulan Ini</button>
             </div>
-            <div id="detail-transaksi-rekap" class="table-wrap">
-              <!-- table -->
-            </div>
+            <div id="detail-transaksi-rekap" class="table-wrap"></div>
           </div>
         </div>
 
@@ -259,16 +261,14 @@
             <h3 style="margin:0;">Ringkasan per Bulan</h3>
             <button class="btn btn-sm btn-danger" id="btn-reset-semua">Reset Semua Data Penjualan</button>
           </div>
-          <div id="tabel-profit-modal" class="table-wrap">
-            <!-- dynamic table -->
-          </div>
+          <div id="tabel-profit-modal" class="table-wrap"></div>
         </div>
 
         <div class="card info-box">
           <h4>📌 Cara Baca</h4>
           <ul>
-            <li><strong>Modal Aman</strong> = Total HPP dari semua produk yang sudah terjual. Ini adalah uang yang “kembali” dan aman dipakai untuk membeli bahan baku lagi.</li>
-            <li><strong>Keuntungan</strong> = Selisih Harga Jual − HPP. Ini adalah profit murni yang bisa kamu ambil atau pakai bebas.</li>
+            <li><strong>Modal Aman</strong> = Total HPP dari semua produk yang sudah terjual.</li>
+            <li><strong>Keuntungan</strong> = Selisih Harga Akhir − HPP.</li>
             <li>Setiap kali ada penjualan, sistem otomatis memisahkan bagian modal dan bagian profit.</li>
           </ul>
         </div>
@@ -276,7 +276,6 @@
     </main>
   </div>
 
-  <!-- Modal Konfirmasi Hapus Produk -->
   <div id="modal-hapus" class="modal">
     <div class="modal-content">
       <h3>Konfirmasi Hapus</h3>
@@ -290,7 +289,6 @@
   </div>
 
   <div id="toast" class="toast"></div>
-
   <script src="script.js"></script>
 </body>
 </html>
