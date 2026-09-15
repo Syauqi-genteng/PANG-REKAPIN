@@ -134,7 +134,6 @@ function addBahanRow(nama = '', harga = '', qty = '') {
 
 document.getElementById('btn-tambah-bahan').addEventListener('click', () => addBahanRow());
 
-// Kalkulator Markup - real time
 function updatePreviewHarga() {
   let totalHPP = 0;
   document.querySelectorAll('.bahan-row').forEach(row => {
@@ -317,6 +316,10 @@ function renderPenjualan() {
       <div class="left">
         <span class="tanggal">${e.date}</span>
         <span class="nama">${e.nama} <small style="color:var(--text-muted)">(${e.sku})</small></span>
+        <small style="color:var(--text-muted)">
+          Harga Akhir: ${formatRp(e.hargaAkhir || e.hargaJual)}
+          ${e.potongan > 0 ? ` | Potongan: ${formatRp(e.potongan)}` : ''}
+        </small>
       </div>
       <div class="right" style="display:flex; align-items:center; gap:8px;">
         <div>
@@ -337,6 +340,18 @@ function hapusPenjualan(id) {
   showToast('Transaksi berhasil dihapus');
   renderPenjualan();
 }
+
+function hitungPotongan() {
+  if (!selectedProductForSale) return;
+
+  const hargaJual = selectedProductForSale.hargaJual;
+  const hargaAkhir = parseFloat(document.getElementById('harga-akhir').value) || 0;
+  const potongan = Math.max(0, hargaJual - hargaAkhir);
+
+  document.getElementById('potongan').value = formatRp(potongan);
+}
+
+document.getElementById('harga-akhir')?.addEventListener('input', hitungPotongan);
 
 // Search product for sale
 const cariInput = document.getElementById('cari-produk-jual');
@@ -372,14 +387,22 @@ hasilCari.addEventListener('click', (e) => {
   if (!p) return;
 
   selectedProductForSale = p;
+
   document.getElementById('produk-terpilih').style.display = 'flex';
   document.getElementById('pilih-nama').textContent = p.nama;
   document.getElementById('pilih-sku').textContent = 'SKU: ' + p.sku;
   document.getElementById('pilih-jual').textContent = formatRp(p.hargaJual);
   document.getElementById('pilih-hpp').textContent = formatRp(p.hpp);
+
+  document.getElementById('harga-akhir-section').style.display = 'block';
+  document.getElementById('harga-akhir').value = p.hargaJual;
+  document.getElementById('potongan').value = formatRp(0);
+
   document.getElementById('btn-simpan-jual').disabled = false;
   cariInput.value = p.nama;
   hasilCari.classList.remove('show');
+
+  hitungPotongan();
 });
 
 document.addEventListener('click', (e) => {
@@ -397,9 +420,15 @@ document.getElementById('form-penjualan').addEventListener('submit', (e) => {
 
   const tanggal = document.getElementById('tanggal-jual').value;
   const qty = parseInt(document.getElementById('qty-jual').value) || 0;
+  const hargaAkhir = parseFloat(document.getElementById('harga-akhir').value) || 0;
 
   if (!tanggal || qty < 1) {
     showToast('Tanggal dan qty wajib diisi', true);
+    return;
+  }
+
+  if (hargaAkhir <= 0) {
+    showToast('Harga akhir harus diisi', true);
     return;
   }
 
@@ -409,6 +438,8 @@ document.getElementById('form-penjualan').addEventListener('submit', (e) => {
     return;
   }
 
+  const potongan = selectedProductForSale.hargaJual - hargaAkhir;
+
   const entry = {
     id: generateId(),
     date: tanggal,
@@ -417,19 +448,25 @@ document.getElementById('form-penjualan').addEventListener('submit', (e) => {
     sku: selectedProductForSale.sku,
     qty,
     hargaJual: selectedProductForSale.hargaJual,
+    hargaAkhir: hargaAkhir,
+    potongan: potongan,
     hpp: selectedProductForSale.hpp,
-    totalJual: selectedProductForSale.hargaJual * qty,
+    totalJual: hargaAkhir * qty,
     totalHPP: selectedProductForSale.hpp * qty,
-    totalProfit: (selectedProductForSale.hargaJual - selectedProductForSale.hpp) * qty
+    totalProfit: (hargaAkhir - selectedProductForSale.hpp) * qty
   };
 
   currentSales.entries.push(entry);
   save(STORAGE_KEYS.currentSales, currentSales);
 
+  // Reset form
   selectedProductForSale = null;
   document.getElementById('produk-terpilih').style.display = 'none';
+  document.getElementById('harga-akhir-section').style.display = 'none';
   document.getElementById('cari-produk-jual').value = '';
   document.getElementById('qty-jual').value = 1;
+  document.getElementById('harga-akhir').value = '';
+  document.getElementById('potongan').value = '';
   document.getElementById('btn-simpan-jual').disabled = true;
 
   showToast('Penjualan berhasil dicatat!');
@@ -488,6 +525,7 @@ function renderRekapPenjualan() {
               <th>Tanggal</th>
               <th>Produk</th>
               <th>Qty</th>
+              <th>Harga Akhir</th>
               <th>Penjualan</th>
               <th>Modal (HPP)</th>
               <th>Profit</th>
@@ -499,6 +537,7 @@ function renderRekapPenjualan() {
                 <td>${e.date}</td>
                 <td>${e.nama}<br><small style="color:var(--text-muted)">${e.sku}</small></td>
                 <td>${e.qty}</td>
+                <td>${formatRp(e.hargaAkhir || e.hargaJual)}</td>
                 <td>${formatRp(e.totalJual)}</td>
                 <td>${formatRp(e.totalHPP)}</td>
                 <td><strong>${formatRp(e.totalProfit)}</strong></td>
