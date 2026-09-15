@@ -2,7 +2,8 @@
 const STORAGE_KEYS = {
   products: 'kb_products',
   currentSales: 'kb_current_sales',
-  archived: 'kb_archived_sales'
+  archived: 'kb_archived_sales',
+  cash: 'kb_cash'
 };
 
 function load(key) {
@@ -41,6 +42,7 @@ function getMonthLabel(ym) {
 let products = load(STORAGE_KEYS.products) || [];
 let currentSales = load(STORAGE_KEYS.currentSales) || { yearMonth: getCurrentYearMonth(), entries: [] };
 let archived = load(STORAGE_KEYS.archived) || {};
+let cash = load(STORAGE_KEYS.cash) || [];
 
 let selectedProductForSale = null;
 let productToDelete = null;
@@ -62,14 +64,43 @@ function checkMonthChange() {
 }
 
 function calculateMonthTotals(entries) {
-  let kotor = 0, modal = 0, profit = 0, qty = 0;
+  let kotor = 0, modal = 0, profit = 0, qty = 0, potongan = 0;
   entries.forEach(e => {
     kotor += e.totalJual;
     modal += e.totalHPP;
     profit += e.totalProfit;
     qty += e.qty;
+    potongan += (e.potongan || 0) * (e.qty || 1);
   });
-  return { kotor, modal, profit, qty };
+  return { kotor, modal, profit, qty, potongan };
+}
+
+function getAllSalesTotals() {
+  const allMonths = { ...archived };
+  if (currentSales.entries.length > 0) {
+    allMonths[currentSales.yearMonth] = {
+      entries: currentSales.entries,
+      totals: calculateMonthTotals(currentSales.entries)
+    };
+  }
+
+  let totalModal = 0, totalProfit = 0, totalPotongan = 0, totalKotor = 0;
+  Object.values(allMonths).forEach(m => {
+    totalModal += m.totals.modal || 0;
+    totalProfit += m.totals.profit || 0;
+    totalPotongan += m.totals.potongan || 0;
+    totalKotor += m.totals.kotor || 0;
+  });
+  return { totalModal, totalProfit, totalPotongan, totalKotor };
+}
+
+function calculateCash() {
+  let masuk = 0, keluar = 0;
+  cash.forEach(c => {
+    if (c.type === 'masuk') masuk += c.amount;
+    else keluar += c.amount;
+  });
+  return { masuk, keluar, saldo: masuk - keluar };
 }
 
 // ===================== TOAST =====================
@@ -95,6 +126,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     }
     if (btn.dataset.menu === 'rekap-penjualan') renderRekapPenjualan();
     if (btn.dataset.menu === 'profit-modal') renderProfitModal();
+    if (btn.dataset.menu === 'keuangan') renderKeuangan();
   });
 });
 
@@ -353,7 +385,6 @@ function hitungPotongan() {
 
 document.getElementById('harga-akhir')?.addEventListener('input', hitungPotongan);
 
-// Search product for sale
 const cariInput = document.getElementById('cari-produk-jual');
 const hasilCari = document.getElementById('hasil-cari-produk');
 
@@ -459,7 +490,6 @@ document.getElementById('form-penjualan').addEventListener('submit', (e) => {
   currentSales.entries.push(entry);
   save(STORAGE_KEYS.currentSales, currentSales);
 
-  // Reset form
   selectedProductForSale = null;
   document.getElementById('produk-terpilih').style.display = 'none';
   document.getElementById('harga-akhir-section').style.display = 'none';
@@ -553,7 +583,6 @@ function renderRekapPenjualan() {
   };
 }
 
-// Hapus data 1 bulan
 document.getElementById('btn-hapus-bulan')?.addEventListener('click', () => {
   const select = document.getElementById('select-bulan-rekap');
   const ym = select.value;
@@ -581,6 +610,11 @@ document.getElementById('btn-hapus-bulan')?.addEventListener('click', () => {
 function renderProfitModal() {
   checkMonthChange();
 
+  const { totalModal, totalProfit } = getAllSalesTotals();
+
+  document.getElementById('total-modal-aman').textContent = formatRp(totalModal);
+  document.getElementById('total-keuntungan').textContent = formatRp(totalProfit);
+
   const allMonths = { ...archived };
   if (currentSales.entries.length > 0) {
     allMonths[currentSales.yearMonth] = {
@@ -589,13 +623,8 @@ function renderProfitModal() {
     };
   }
 
-  let totalModal = 0;
-  let totalProfit = 0;
-
   const rows = Object.keys(allMonths).sort().reverse().map(ym => {
     const t = allMonths[ym].totals;
-    totalModal += t.modal;
-    totalProfit += t.profit;
     return `
       <tr>
         <td>${getMonthLabel(ym)}</td>
@@ -605,9 +634,6 @@ function renderProfitModal() {
       </tr>
     `;
   });
-
-  document.getElementById('total-modal-aman').textContent = formatRp(totalModal);
-  document.getElementById('total-keuntungan').textContent = formatRp(totalProfit);
 
   const table = document.getElementById('tabel-profit-modal');
   if (rows.length === 0) {
@@ -637,9 +663,8 @@ function renderProfitModal() {
   }
 }
 
-// Reset semua data penjualan
 document.getElementById('btn-reset-semua')?.addEventListener('click', () => {
-  if (!confirm('PERINGATAN!\n\nIni akan menghapus SEMUA data penjualan (semua bulan).\nData produk tidak akan terhapus.\n\nYakin ingin melanjutkan?')) return;
+  if (!confirm('PERINGATAN!\n\nIni akan menghapus SEMUA data penjualan (semua bulan).\nData produk dan kas tidak akan terhapus.\n\nYakin ingin melanjutkan?')) return;
 
   currentSales = { yearMonth: getCurrentYearMonth(), entries: [] };
   archived = {};
@@ -650,6 +675,89 @@ document.getElementById('btn-reset-semua')?.addEventListener('click', () => {
   renderPenjualan();
   renderRekapPenjualan();
   renderProfitModal();
+  renderKeuangan();
+});
+
+// ===================== MENU 5: KEUANGAN SAAT INI =====================
+function renderKeuangan() {
+  const { masuk, keluar, saldo } = calculateCash();
+  const { totalModal, totalProfit, totalPotongan } = getAllSalesTotals();
+
+  document.getElementById('saldo-saat-ini').textContent = formatRp(saldo);
+  document.getElementById('total-masuk').textContent = formatRp(masuk);
+  document.getElementById('total-keluar').textContent = formatRp(keluar);
+
+  document.getElementById('fin-total-modal').textContent = formatRp(totalModal);
+  document.getElementById('fin-total-profit').textContent = formatRp(totalProfit);
+  document.getElementById('fin-total-potongan').textContent = formatRp(totalPotongan);
+  document.getElementById('fin-saldo-aktual').textContent = formatRp(saldo);
+
+  // Set default date
+  document.getElementById('tanggal-kas').value = new Date().toISOString().slice(0, 10);
+
+  // Render riwayat kas
+  const list = document.getElementById('riwayat-kas');
+  if (cash.length === 0) {
+    list.innerHTML = '<div class="empty-state"><p>Belum ada catatan kas.</p></div>';
+    return;
+  }
+
+  const sorted = [...cash].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+
+  list.innerHTML = sorted.map(c => `
+    <div class="riwayat-item">
+      <div class="left">
+        <span class="tanggal">${c.date}</span>
+        <span class="nama">${c.keterangan}</span>
+        <small style="color:${c.type === 'masuk' ? 'var(--green)' : 'var(--orange)'}">
+          ${c.type === 'masuk' ? 'Uang Masuk' : 'Uang Keluar'}
+        </small>
+      </div>
+      <div class="right" style="display:flex; align-items:center; gap:8px;">
+        <div class="total" style="color:${c.type === 'masuk' ? 'var(--green)' : 'var(--orange)'}">
+          ${c.type === 'masuk' ? '+' : '-'} ${formatRp(c.amount)}
+        </div>
+        <button class="btn-hapus-item" onclick="hapusKas('${c.id}')">Hapus</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function hapusKas(id) {
+  if (!confirm('Yakin ingin menghapus catatan kas ini?')) return;
+  cash = cash.filter(c => c.id !== id);
+  save(STORAGE_KEYS.cash, cash);
+  showToast('Catatan kas berhasil dihapus');
+  renderKeuangan();
+}
+
+document.getElementById('form-kas')?.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const tanggal = document.getElementById('tanggal-kas').value;
+  const tipe = document.getElementById('tipe-kas').value;
+  const keterangan = document.getElementById('keterangan-kas').value.trim();
+  const nominal = parseFloat(document.getElementById('nominal-kas').value) || 0;
+
+  if (!tanggal || !keterangan || nominal <= 0) {
+    showToast('Lengkapi semua data', true);
+    return;
+  }
+
+  cash.push({
+    id: generateId(),
+    date: tanggal,
+    type: tipe,
+    keterangan,
+    amount: nominal
+  });
+
+  save(STORAGE_KEYS.cash, cash);
+  showToast('Catatan kas berhasil disimpan');
+
+  document.getElementById('form-kas').reset();
+  document.getElementById('tanggal-kas').value = new Date().toISOString().slice(0, 10);
+  renderKeuangan();
 });
 
 // ===================== INIT =====================
@@ -658,3 +766,4 @@ renderProdukList();
 renderPenjualan();
 renderRekapPenjualan();
 renderProfitModal();
+renderKeuangan();
