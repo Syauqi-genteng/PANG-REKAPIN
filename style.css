@@ -774,7 +774,7 @@ td strong {
   outline: none;
 }
 
-/* Tombol hapus di riwayat penjualan */
+/* Tombol hapus di riwayat */
 .riwayat-item .btn-hapus-item {
   background: transparent;
   border: 1px solid var(--danger);
