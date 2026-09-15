@@ -11,12 +11,11 @@
 </head>
 <body>
   <div class="app">
-    <!-- Sidebar -->
     <aside class="sidebar">
       <div class="logo">
         <div class="logo-icon">💰</div>
         <div>
-          <h1>PANG_REKAPIN</h1>
+          <h1>Keuangan Bisnis</h1>
           <p>Manajemen Produk & Profit</p>
         </div>
       </div>
@@ -37,13 +36,16 @@
           <span class="nav-icon">💵</span>
           <span>Rekap Profit & Modal</span>
         </button>
+        <button class="nav-btn" data-menu="keuangan">
+          <span class="nav-icon">🏦</span>
+          <span>Keuangan Saat Ini</span>
+        </button>
       </nav>
       <div class="sidebar-footer">
         <small>Data disimpan di browser</small>
       </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="main">
       <!-- MENU 1: Daftar Komponen -->
       <section id="menu-komponen" class="menu-section active">
@@ -271,6 +273,93 @@
             <li><strong>Keuntungan</strong> = Selisih Harga Akhir − HPP.</li>
             <li>Setiap kali ada penjualan, sistem otomatis memisahkan bagian modal dan bagian profit.</li>
           </ul>
+        </div>
+      </section>
+
+      <!-- MENU 5: Keuangan Saat Ini -->
+      <section id="menu-keuangan" class="menu-section">
+        <header class="menu-header">
+          <h2>Keuangan Saat Ini</h2>
+          <p>Catat uang masuk & keluar + lihat kekuatan finansial perusahaan</p>
+        </header>
+
+        <div class="summary-cards three">
+          <div class="summary-card green">
+            <span class="label">Saldo Saat Ini</span>
+            <strong id="saldo-saat-ini">Rp 0</strong>
+          </div>
+          <div class="summary-card blue">
+            <span class="label">Total Uang Masuk</span>
+            <strong id="total-masuk">Rp 0</strong>
+          </div>
+          <div class="summary-card orange">
+            <span class="label">Total Uang Keluar</span>
+            <strong id="total-keluar">Rp 0</strong>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Catat Uang Masuk / Keluar</h3>
+          <form id="form-kas">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Tanggal</label>
+                <input type="date" id="tanggal-kas" required />
+              </div>
+              <div class="form-group">
+                <label>Tipe</label>
+                <select id="tipe-kas" required>
+                  <option value="masuk">Uang Masuk</option>
+                  <option value="keluar">Uang Keluar</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Keterangan</label>
+                <input type="text" id="keterangan-kas" placeholder="Contoh: TF Bank, Modal Awal, Bayar Supplier..." required />
+              </div>
+              <div class="form-group">
+                <label>Nominal (Rp)</label>
+                <input type="number" id="nominal-kas" min="1" placeholder="Contoh: 500000" required />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Riwayat Kas</h3>
+          <div id="riwayat-kas" class="riwayat-list"></div>
+        </div>
+
+        <div class="card">
+          <h3>💪 Kekuatan Finansial Perusahaan</h3>
+          <div class="summary-cards two" style="margin-top:16px;">
+            <div class="summary-card blue">
+              <span class="label">Total Modal (HPP) dari Penjualan</span>
+              <strong id="fin-total-modal">Rp 0</strong>
+              <small>Uang modal yang sudah kembali dari penjualan</small>
+            </div>
+            <div class="summary-card orange">
+              <span class="label">Total Keuntungan dari Penjualan</span>
+              <strong id="fin-total-profit">Rp 0</strong>
+              <small>Profit murni dari semua penjualan</small>
+            </div>
+          </div>
+          <div class="summary-cards two">
+            <div class="summary-card">
+              <span class="label">Total Potongan Marketplace</span>
+              <strong id="fin-total-potongan" style="color:var(--orange)">Rp 0</strong>
+            </div>
+            <div class="summary-card green">
+              <span class="label">Saldo Kas Aktual</span>
+              <strong id="fin-saldo-aktual">Rp 0</strong>
+              <small>Uang yang benar-benar ada di tangan / rekening</small>
+            </div>
+          </div>
         </div>
       </section>
     </main>
