@@ -476,7 +476,8 @@ body {
   font-size: 28px;
 }
 
-.summary-card.big small {
+.summary-card.big small,
+.summary-card small {
   display: block;
   margin-top: 8px;
   font-size: 12px;
